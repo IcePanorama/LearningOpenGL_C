@@ -8,6 +8,7 @@ void clean_up (void);
 void handle_user_input (void);
 void predraw (void);
 void draw (void);
+void print_opengl_version_info (void);
 
 /* Globals */
 int g_screen_height = 480;
@@ -59,6 +60,8 @@ initialize_program (void)
       puts ("Could not create an SDL_Context.");
       exit (1);
     }
+
+  print_opengl_version_info ();
 }
 
 void
@@ -104,4 +107,14 @@ predraw (void)
 void
 draw (void)
 {
+}
+
+void
+print_opengl_version_info (void)
+{
+  printf ("Vendor: %s\n", glGetString (GL_VENDOR));
+  printf ("Renderer: %s\n", glGetString (GL_RENDERER));
+  printf ("Version: %s\n", glGetString (GL_VERSION));
+  printf ("Shading Language Version: %s\n",
+          glGetString (GL_SHADING_LANGUAGE_VERSION));
 }
