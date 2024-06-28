@@ -17,11 +17,11 @@ GLuint create_shader_program (const char *vertex_shader_source,
 GLuint compile_shader (GLuint type, const char *src);
 
 /* Globals */
-int g_screen_height = 480;
 int g_screen_width = 640;
+int g_screen_height = 480;
 SDL_Window *g_graphics_application_window;
 SDL_GLContext g_opengl_context;
-bool g_quitting = false;
+GLboolean g_quitting = GL_FALSE;
 GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
 GLuint g_graphics_pipeline_shader_program;
@@ -44,6 +44,7 @@ int
 main (void)
 {
   initialize_program ();
+  vertex_specification ();
   create_graphics_pipeline ();
   main_loop ();
   clean_up ();
@@ -97,10 +98,9 @@ initialize_program (void)
 void
 main_loop (void)
 {
-  while (!g_quitting)
+  while (g_quitting != GL_TRUE)
     {
       handle_user_input ();
-      vertex_specification ();
       predraw ();
       draw ();
 
@@ -125,7 +125,7 @@ handle_user_input (void)
       if (event.type == SDL_QUIT)
         {
           puts ("Goodbye.");
-          g_quitting = true;
+          g_quitting = GL_TRUE;
         }
     }
 }
@@ -139,6 +139,8 @@ predraw (void)
   glViewport (0, 0, g_screen_width, g_screen_height);
   glClearColor (1.0f, 1.0f, 0.0f, 1.0f);
 
+  glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
   glUseProgram (g_graphics_pipeline_shader_program);
 }
 
@@ -148,6 +150,8 @@ draw (void)
   glBindVertexArray (g_vertex_array_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
   glDrawArrays (GL_TRIANGLES, 0, 3);
+
+  glUseProgram (0);
 }
 
 void
@@ -163,8 +167,14 @@ print_opengl_version_info (void)
 void
 vertex_specification (void)
 {
-  const GLfloat vertex_positions[]
-      = { -0.8f, -0.8f, 0.0f, 0.8f, -0.8f, 0.0f, 0.0f, 0.8f, 0.0f };
+  /* clang-format off */
+  const GLfloat vertex_positions[] =
+  { 
+    -0.8f, -0.8f, 0.0f,
+     0.8f, -0.8f, 0.0f,
+     0.0f,  0.8f, 0.0f
+  };
+  /* clang-format on */
 
   glCreateVertexArrays (1, &g_vertex_array_object);
   glBindVertexArray (g_vertex_array_object);
@@ -203,6 +213,39 @@ compile_shader (GLuint type, const char *src)
 
   glShaderSource (shader_object, 1, &src, NULL);
   glCompileShader (shader_object);
+
+  GLint result;
+  glGetShaderiv (shader_object, GL_COMPILE_STATUS, &result);
+  if (result == GL_FALSE)
+    {
+      GLint length;
+      glGetShaderiv (shader_object, GL_INFO_LOG_LENGTH, &length);
+      char *error_messages = malloc (length * sizeof (char));
+      if (error_messages == NULL)
+        {
+          printf ("Unable to malloc error message buffer of size %d.\n",
+                  length);
+          glDeleteShader (shader_object);
+          return shader_object;
+        }
+
+      glGetShaderInfoLog (shader_object, length, &length, error_messages);
+
+      if (type == GL_VERTEX_SHADER)
+        {
+          printf ("Error: GL_VERTEX_SHADER failed to compile.\n%s\n",
+                  error_messages);
+        }
+      else if (type == GL_FRAGMENT_SHADER)
+        {
+          printf ("Error: GL_FRAGMENT_SHADER failed to compile.\n%s\n",
+                  error_messages);
+        }
+
+      free (error_messages);
+
+      glDeleteShader (shader_object);
+    }
 
   return shader_object;
 }
