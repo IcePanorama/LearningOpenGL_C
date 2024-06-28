@@ -8,7 +8,7 @@ STYLE=GNU
 
 all: clean format $(TARGET)
 
-no-test: clean $(TARGET)
+full: all test
 
 $(TARGET): 
 	gcc $(SRC_FILES) -o $(TARGET) $(LIBS) $(CFLAGS)

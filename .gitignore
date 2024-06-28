@@ -1,5 +1,7 @@
 main
 
+vgcore.*
+
 # Prerequisites
 *.d
 
