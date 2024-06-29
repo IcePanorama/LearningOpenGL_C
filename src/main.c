@@ -19,6 +19,13 @@ void draw (void);
 void print_opengl_version_info (void);
 void vertex_specification (void);
 void create_graphics_pipeline (void);
+static void gl_clear_all_errors (void);
+static bool gl_has_error_status (const char *function, int line);
+// FIXME: do this without a macro
+#define GL_CHECK(x)                                                           \
+  gl_clear_all_errors ();                                                     \
+  x;                                                                          \
+  gl_has_error_status (#x, __LINE__);
 
 /* Global Variables */
 int g_screen_width = 640;
@@ -140,7 +147,7 @@ draw (void)
 {
   glBindVertexArray (g_vertex_array_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
-  glDrawElements (GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  GL_CHECK (glDrawElements (GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);)
 
   glUseProgram (0);
 }
@@ -217,4 +224,26 @@ create_graphics_pipeline (void)
 
   g_graphics_pipeline_shader_program
       = create_shader_program (vertex_shader_source, fragment_shader_source);
+}
+
+static void
+gl_clear_all_errors (void)
+{
+  GLenum error;
+  while ((error = glGetError ()) != GL_NO_ERROR)
+    {
+    }
+}
+
+static bool
+gl_has_error_status (const char *function, int line)
+{
+  GLenum error;
+  while ((error = glGetError ()) != GL_NO_ERROR)
+    {
+      printf ("OpenGL error: %#010x\tLine: %d\tFunction: %s\n", error, line,
+              function);
+      return true;
+    }
+  return false;
 }
