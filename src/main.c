@@ -2,7 +2,10 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+/* Function Prototypes */
 void initialize_program (void);
 void main_loop (void);
 void clean_up (void);
@@ -15,30 +18,17 @@ void create_graphics_pipeline (void);
 GLuint create_shader_program (const char *vertex_shader_source,
                               const char *fragment_shader_source);
 GLuint compile_shader (GLuint type, const char *src);
+char *load_shader_as_string (const char *FILE_NAME);
 
-/* Globals */
+/* Global Variables */
 int g_screen_width = 640;
 int g_screen_height = 480;
 SDL_Window *g_graphics_application_window;
 SDL_GLContext g_opengl_context;
-GLboolean g_quitting = GL_FALSE;
+bool g_quitting = false;
 GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
 GLuint g_graphics_pipeline_shader_program;
-const char *g_VERTEX_SHADER_SOURCE
-    = "#version 410 core\n"
-      "in vec4 position;\n"
-      "void main()\n"
-      "{\n"
-      " gl_Position = vec4(position.x, position.y, position.z, position.w);\n"
-      "}\n";
-const char *g_FRAGMENT_SHADER_SOURCE
-    = "#version 410 core\n"
-      "out vec4 color;\n"
-      "void main()\n"
-      "{\n"
-      " color = vec4(1.0f, 0.5f, 0.0f, 1.0f);\n"
-      "}\n";
 
 int
 main (void)
@@ -98,7 +88,7 @@ initialize_program (void)
 void
 main_loop (void)
 {
-  while (g_quitting != GL_TRUE)
+  while (!g_quitting)
     {
       handle_user_input ();
       predraw ();
@@ -125,7 +115,7 @@ handle_user_input (void)
       if (event.type == SDL_QUIT)
         {
           puts ("Goodbye.");
-          g_quitting = GL_TRUE;
+          g_quitting = true;
         }
     }
 }
@@ -278,6 +268,47 @@ create_shader_program (const char *vertex_shader_source,
 void
 create_graphics_pipeline (void)
 {
-  g_graphics_pipeline_shader_program = create_shader_program (
-      g_VERTEX_SHADER_SOURCE, g_FRAGMENT_SHADER_SOURCE);
+  char *vertex_shader_source
+      = load_shader_as_string ("src/shaders/vertex_shader.glsl");
+  char *fragment_shader_source
+      = load_shader_as_string ("src/shaders/fragment_shader.glsl");
+
+  g_graphics_pipeline_shader_program
+      = create_shader_program (vertex_shader_source, fragment_shader_source);
+}
+
+char *
+load_shader_as_string (const char *FILE_NAME)
+{
+  FILE *file_ptr = fopen (FILE_NAME, "r");
+  if (file_ptr == NULL)
+    {
+      printf ("Could not open shader source file, %s.\n", FILE_NAME);
+      exit (1);
+    }
+
+  fseek (file_ptr, 0, SEEK_END);
+  size_t file_size = ftell (file_ptr);
+  fseek (file_ptr, 0, SEEK_SET);
+
+  char *output = (char *)malloc (file_size + 1);
+  if (output == NULL)
+    {
+      fclose (file_ptr);
+      puts (
+          "Error: failed to malloc output of load_shader_as_string function.");
+      return NULL;
+    }
+
+  if ((fread (output, 1, file_size, file_ptr)) != file_size)
+    {
+      fclose (file_ptr);
+      free (output);
+      printf ("Error reading file %s.\n", FILE_NAME);
+      return NULL;
+    }
+
+  output[file_size] = '\0';
+  fclose (file_ptr);
+  return output;
 }
