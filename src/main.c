@@ -29,6 +29,7 @@ bool g_quitting = false;
 GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
 GLuint g_graphics_pipeline_shader_program;
+GLuint g_index_buffer_object;
 
 int
 main (void)
@@ -139,7 +140,7 @@ draw (void)
 {
   glBindVertexArray (g_vertex_array_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
-  glDrawArrays (GL_TRIANGLES, 0, 6);
+  glDrawElements (GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
   glUseProgram (0);
 }
@@ -168,24 +169,31 @@ vertex_specification (void)
     -0.5f,  0.5f, 0.0f, // top left
      0.0f,  0.0f, 1.0f,
       // second tri
-     0.5f, -0.5f, 0.0f, // bot right
-     0.0f,  1.0f, 0.0f,
      0.5f,  0.5f, 0.0f, // top right
      0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, 0.0f, // top left
-     0.0f,  0.0f, 1.0f
   };
+  const GLuint index_buffer_data[] = 
+    {
+      2, 0, 1,
+      3, 2, 1
+    };
   /* clang-format on */
 
   glCreateVertexArrays (1, &g_vertex_array_object);
   glBindVertexArray (g_vertex_array_object);
 
-  /* Positions */
   glGenBuffers (1, &g_vertex_buffer_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
   glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_data), vertex_data,
                 GL_STATIC_DRAW);
 
+  /* IBO */
+  glGenBuffers (1, &g_index_buffer_object);
+  glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, g_index_buffer_object);
+  glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof (index_buffer_data),
+                index_buffer_data, GL_STATIC_DRAW);
+
+  /* Positions */
   glEnableVertexAttribArray (0);
   glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof (GLfloat), NULL);
 
