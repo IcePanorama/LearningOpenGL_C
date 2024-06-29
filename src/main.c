@@ -140,7 +140,7 @@ draw (void)
 {
   glBindVertexArray (g_vertex_array_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
-  glDrawArrays (GL_TRIANGLES, 0, 3);
+  glDrawArrays (GL_TRIANGLES, 0, 6);
 
   glUseProgram (0);
 }
@@ -161,13 +161,21 @@ vertex_specification (void)
   /* clang-format off */
   const GLfloat vertex_positions[] =
   { 
-    -0.8f, -0.8f, 0.0f,
-     0.8f, -0.8f, 0.0f,
-     0.0f,  0.8f, 0.0f
+      // first tri
+    -0.5f, -0.5f, 0.0f, // bot left
+     0.5f, -0.5f, 0.0f, // bot right
+    -0.5f,  0.5f, 0.0f, // top left
+      // second tri
+     0.5f, -0.5f, 0.0f, // bot right
+     0.5f,  0.5f, 0.0f, // top right
+    -0.5f,  0.5f, 0.0f, // top left
   };
   const GLfloat vertex_colors[] =
   { 
     1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 1.0f, 0.0f,
     0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f
   };
