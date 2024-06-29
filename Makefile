@@ -1,6 +1,6 @@
 SRC_DIR=src
 SRC_FILES=$(SRC_DIR)/*.c
-#INCL_FILES=$(SRC_DIR)/*.h
+INCL_FILES=$(SRC_DIR)/*.h
 LIBS=-lSDL2 -lGL -lGLEW
 TARGET=main
 CFLAGS=-std=c99 -Wpedantic -Wextra -Werror -Wall -Wstrict-aliasing=3 -Wwrite-strings -Wvla -Wcast-align=strict -Wstrict-prototypes -Wstringop-overflow=4 -Wshadow -fanalyzer
@@ -11,7 +11,7 @@ all: clean format $(TARGET)
 full: all test
 
 $(TARGET): 
-	gcc $(SRC_FILES) -o $(TARGET) $(LIBS) $(CFLAGS)
+	gcc $(SRC_FILES) -I./$(INCL_FILES) -o $(TARGET) $(LIBS) $(CFLAGS)
 
 test: $(TARGET)
 	valgrind --leak-check=yes ./$(TARGET)
