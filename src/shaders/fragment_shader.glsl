@@ -1,8 +1,9 @@
 #version 410 core
 
+in vec3 v_vertex_colors;
 out vec4 color;
 
 void main()
 {
-	color = vec4(1.0f, 0.5f, 0.0f, 1.0f);
+    color = vec4(v_vertex_colors.x, v_vertex_colors.y, v_vertex_colors.z, 1.0f);
 }

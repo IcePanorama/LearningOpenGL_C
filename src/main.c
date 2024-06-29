@@ -18,7 +18,7 @@ void create_graphics_pipeline (void);
 GLuint create_shader_program (const char *vertex_shader_source,
                               const char *fragment_shader_source);
 GLuint compile_shader (GLuint type, const char *src);
-char *load_shader_as_string (const char *FILE_NAME);
+char *load_shader_as_string (const char *FILENAME);
 
 /* Global Variables */
 int g_screen_width = 640;
@@ -28,6 +28,7 @@ SDL_GLContext g_opengl_context;
 bool g_quitting = false;
 GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
+GLuint g_vertex_buffer_object2;
 GLuint g_graphics_pipeline_shader_program;
 
 int
@@ -164,11 +165,18 @@ vertex_specification (void)
      0.8f, -0.8f, 0.0f,
      0.0f,  0.8f, 0.0f
   };
+  const GLfloat vertex_colors[] =
+  { 
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f
+  };
   /* clang-format on */
 
   glCreateVertexArrays (1, &g_vertex_array_object);
   glBindVertexArray (g_vertex_array_object);
 
+  /* Positions */
   glGenBuffers (1, &g_vertex_buffer_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
   glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_positions), vertex_positions,
@@ -177,8 +185,18 @@ vertex_specification (void)
   glEnableVertexAttribArray (0);
   glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+  /* Colors */
+  glGenBuffers (1, &g_vertex_buffer_object2);
+  glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object2);
+  glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_colors), vertex_colors,
+                GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray (1);
+  glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
   glBindVertexArray (0);
   glDisableVertexAttribArray (0);
+  glDisableVertexAttribArray (1);
 }
 
 GLuint
@@ -278,12 +296,12 @@ create_graphics_pipeline (void)
 }
 
 char *
-load_shader_as_string (const char *FILE_NAME)
+load_shader_as_string (const char *FILENAME)
 {
-  FILE *file_ptr = fopen (FILE_NAME, "r");
+  FILE *file_ptr = fopen (FILENAME, "r");
   if (file_ptr == NULL)
     {
-      printf ("Could not open shader source file, %s.\n", FILE_NAME);
+      printf ("Could not open shader source file, %s.\n", FILENAME);
       exit (1);
     }
 
@@ -304,7 +322,7 @@ load_shader_as_string (const char *FILE_NAME)
     {
       fclose (file_ptr);
       free (output);
-      printf ("Error reading file %s.\n", FILE_NAME);
+      printf ("Error reading file %s.\n", FILENAME);
       return NULL;
     }
 
