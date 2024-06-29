@@ -28,7 +28,6 @@ SDL_GLContext g_opengl_context;
 bool g_quitting = false;
 GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
-GLuint g_vertex_buffer_object2;
 GLuint g_graphics_pipeline_shader_program;
 
 int
@@ -159,25 +158,22 @@ void
 vertex_specification (void)
 {
   /* clang-format off */
-  const GLfloat vertex_positions[] =
+  const GLfloat vertex_data[] =
   { 
       // first tri
     -0.5f, -0.5f, 0.0f, // bot left
+     1.0f,  0.0f, 0.0f,
      0.5f, -0.5f, 0.0f, // bot right
+     0.0f,  1.0f, 0.0f,
     -0.5f,  0.5f, 0.0f, // top left
+     0.0f,  0.0f, 1.0f,
       // second tri
      0.5f, -0.5f, 0.0f, // bot right
+     0.0f,  1.0f, 0.0f,
      0.5f,  0.5f, 0.0f, // top right
+     0.0f,  1.0f, 0.0f,
     -0.5f,  0.5f, 0.0f, // top left
-  };
-  const GLfloat vertex_colors[] =
-  { 
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
+     0.0f,  0.0f, 1.0f
   };
   /* clang-format on */
 
@@ -187,20 +183,16 @@ vertex_specification (void)
   /* Positions */
   glGenBuffers (1, &g_vertex_buffer_object);
   glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object);
-  glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_positions), vertex_positions,
+  glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_data), vertex_data,
                 GL_STATIC_DRAW);
 
   glEnableVertexAttribArray (0);
-  glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof (GLfloat), NULL);
 
   /* Colors */
-  glGenBuffers (1, &g_vertex_buffer_object2);
-  glBindBuffer (GL_ARRAY_BUFFER, g_vertex_buffer_object2);
-  glBufferData (GL_ARRAY_BUFFER, sizeof (vertex_colors), vertex_colors,
-                GL_STATIC_DRAW);
-
   glEnableVertexAttribArray (1);
-  glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof (GLfloat),
+                         (GLvoid *)(3 * sizeof (GLfloat)));
 
   glBindVertexArray (0);
   glDisableVertexAttribArray (0);
