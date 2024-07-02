@@ -1,10 +1,13 @@
 /* clang-format off */
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
+#include <cglm/cglm.h>
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "shader.h"
 /* clang-format on */
@@ -37,6 +40,7 @@ GLuint g_vertex_array_object;
 GLuint g_vertex_buffer_object;
 GLuint g_graphics_pipeline_shader_program;
 GLuint g_index_buffer_object;
+float g_u_offset = 0.0f;
 
 int
 main (void)
@@ -120,10 +124,22 @@ handle_user_input (void)
   SDL_Event event;
   while (SDL_PollEvent (&event))
     {
-      if (event.type == SDL_QUIT)
+      switch (event.type)
         {
+        case SDL_QUIT:
           puts ("Goodbye.");
           g_quitting = true;
+          break;
+        case SDL_KEYDOWN:
+          if (event.key.keysym.sym == SDLK_UP)
+            {
+              g_u_offset += 0.01f;
+            }
+          else if (event.key.keysym.sym == SDLK_DOWN)
+            {
+              g_u_offset -= 0.01f;
+            }
+          break;
         }
     }
 }
@@ -140,6 +156,17 @@ predraw (void)
   glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   glUseProgram (g_graphics_pipeline_shader_program);
+  //TODO: cache this result so we don't have to search for it every frame
+  GLint location
+      = glGetUniformLocation (g_graphics_pipeline_shader_program, "u_offset");
+  if (location >= 0)
+    {
+      glUniform1f (location, g_u_offset);
+    }
+  else
+    {
+      puts ("Couldn't find u_offset location!");
+    }
 }
 
 void
